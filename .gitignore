@@ -1,0 +1,5 @@
+.idea*
+upload/*
+cache/*
+composer.lock
+composer.phar
