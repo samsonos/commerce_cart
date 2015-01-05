@@ -19,9 +19,11 @@ class Cart extends CompressableService
     public $id = 'cart';
 
 	public $commerceCore;
-	public $popupView = 'popup.php';
-	public $cartIndexView = 'index.php';
-	public $itemView = 'item.php';
+	public $popupView = 'popup';
+	public $cartIndexView = 'cart/index';
+	public $itemView = 'cart/item';
+	public $cartEmptyView = 'cart/empty';
+	public $template;
 	public $renderer;
 
 	public function init(array $params=array())
@@ -29,6 +31,7 @@ class Cart extends CompressableService
 		parent::init( $params );
 		if (isset($this->renderer)) {
 			$this->renderer = & m($this->renderer);
+
 		} else {
 			$this->renderer = & $this;
 		}
@@ -37,14 +40,25 @@ class Cart extends CompressableService
 
 	public function __HANDLER()
 	{
+		s()->active($this->renderer);
+		if (isset($this->template)) {
+			s()->template($this->template);
+		}
 		$orders = $this->commerceCore->ordersList();
 		$rows = '';
+		$amount = 0;
 		foreach ($orders as $order) {
 			foreach ($order->items as $item) {
-				$rows .= $this->renderer->view($this->itemView)->item($item)->product($item->Product)->output();
+				$rows .= $this->renderer->view($this->itemView)->item($item)->product($item->Product)->amount($item->Price*$item->Quantity)->output();
+				$amount += $item->Price*$item->Quantity;
 			}
 		}
-		$this->renderer->view($this->cartIndexView)->rows($rows);
+		if ($rows !== '') {
+			$this->renderer->view($this->cartIndexView)->rows($rows)->amount($amount);
+		} else {
+			$this->renderer->view($this->cartEmptyView);
+		}
+
 	}
 
 	public function __async_add($productId)
