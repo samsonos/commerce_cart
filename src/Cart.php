@@ -6,7 +6,7 @@
 namespace samsonos\commerce\cart;
 
 use samson\core\CompressableService;
-use samson\core\Event;
+use samsonphp\Event\Event;
 
 
 /**
